@@ -8,6 +8,21 @@ import os
 mod = "mod4"
 terminal = "alacritty"
 
+colors = [
+    ['#ffffff', '#ffffff'],
+    # ['#de4aff', '#de4aff'],  blue color
+    # ['#ca1cff', '#ca1cff'],  purple color
+    ['#ffaa3b', '#ffaa3b'],
+    ['#9582ff', '#9582ff'],
+    ['#000000', '#000000']
+]
+
+widget_defaults = dict(
+    font='Ubuntu Bold',
+    fontsize=12,
+    padding=6,
+)
+
 keys = [
     # Switch between windows
     Key([mod], "h", lazy.layout.left(), desc="Move focus to left"),
@@ -57,15 +72,37 @@ keys = [
 
     Key([mod, "control"], "r", lazy.restart(), desc="Restart Qtile"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod, "control"], "m", lazy.spawn('dmenu_run'),
+
+    #MENU
+    Key([mod, "control"], "m", lazy.spawn('dmenu_run -i -fn "Ubuntu Bold-11" -nb ' + colors[3][0] + ' -sb ' + colors[1][0] + ' -nf ' + colors[0][0]),
         desc="Spawn a command using a prompt widget"),
+
+    # SETTINGS
+    # BRIGHTNESS
+    Key([mod], "F5", lazy.spawn('xrandr --output eDP-1 --brightness 1'),
+        desc="turn up brightness"),
+
+    Key([mod], "F4", lazy.spawn('xrandr --output eDP-1 --brightness 0.8'),
+        desc="turn down brightness"),
+
+    # VOLUME
+    Key([mod], "F11", lazy.spawn('pactl -- set-sink-volume 0 -2%'),
+        desc="turn down volume"),
+
+    Key([mod], "F12", lazy.spawn('pactl -- set-sink-volume 0 +2%'),
+        desc="turn up volume"),
+
+    Key([mod], "p", lazy.spawn('/home/jonathan/.config/qtile/scripts/power.sh'),
+        desc="turn up volume")
+
 ]
 
 groups = [
     Group('WWW', layout="Max", matches=[Match(wm_class=['Brave'])]),
+    Group('TERM', layout="MonadTall", matches=[Match(wm_class=['alacritty'])]),
     Group('DEV', layout="MonadTall", matches=[Match(wm_class=['android-studio']), Match(wm_class=['code'])]),
-    Group('TERM', layout="Max", matches=[Match(wm_class=['alacritty'])]),
-    Group('MUS', layout="MonadTall", matches=[Match(wm_class=['spotify'])])
+    Group('MUS', layout="MonadTall", matches=[Match(wm_class=['spotify'])]),
+    Group('TOOLS', layout="MonadTall")
 ]
 
 for i in range(len(groups)):
@@ -83,23 +120,17 @@ for i in range(len(groups)):
         #     desc="move focused window to group {}".format(i.name)),
     ])
 
-colors = [
-    ['#ffffff', '#ffffff'],
-    ['#de4aff', '#de4aff'],
-    ['#9582ff', '#9582ff']
-]
-
 
 layouts = [
     layout.MonadTall(
         border_focus=colors[1][0],
-        border_width=1,
+        border_width=2,
         margin=4,
-        single_margin=5,
-        single_border_width=1
+        single_margin=4,
+        single_border_width=2
     ),
     layout.Max(),
-    # layout.Columns(border_focus_stack='#d75f5f'),
+    layout.Columns(border_focus_stack='#d75f5f'),
     # Try more layouts by unleashing below layouts.
     # layout.Stack(num_stacks=2),
     # layout.Bsp(),
@@ -112,16 +143,11 @@ layouts = [
     # layout.Zoomy(),
 ]
 
-widget_defaults = dict(
-    font='Ubuntu Bold',
-    fontsize=12,
-    padding=6,
-)
 extension_defaults = widget_defaults.copy()
 
 screens = [
     Screen(
-        bottom=bar.Bar(
+        top=bar.Bar(
             [
                 # widget.CurrentLayout(),
                 widget.GroupBox(
@@ -138,17 +164,46 @@ screens = [
                 ),
                 widget.Prompt(),
                 widget.WindowName(),
+                widget.Systray(),
                 widget.Battery(
                     background=colors[2],
                     font='Ubuntu Bold',
                     energy_now_file='charge_now',
-                    update_interval=5
+                    update_interval=10
                 ),
-                widget.Systray(),
-                widget.Clock(foreground=colors[0], background=colors[1], format='%Y-%m-%d %a %I:%M %p'),
-                widget.QuickExit(),
+                widget.Clock(foreground=colors[0], background=colors[1], format='%Y-%m-%d %a %I:%M %p')
             ],
-            20,
+            20
+        ),
+    ),
+    Screen(
+        top=bar.Bar(
+            [
+                # widget.CurrentLayout(),
+                widget.GroupBox(
+                    font='Ubuntu Bold',
+                    fontsize = 10,
+                    padding=5,
+                    border_width=1,
+                    active=colors[0],
+                    inactive=colors[0],
+                    foreground=colors[1],
+                    this_current_screen_border=colors[1],
+                    rounded=False,
+                    highlight_method='block'
+                ),
+                widget.Prompt(),
+                widget.WindowName(),
+                widget.Systray(),
+                widget.Battery(
+                    background=colors[2],
+                    font='Ubuntu Bold',
+                    energy_now_file='charge_now',
+                    update_interval=10
+                ),
+                widget.Clock(foreground=colors[0], background=colors[1], format='%Y-%m-%d %a %I:%M %p')
+            ],
+            20
         ),
     ),
 ]
@@ -167,6 +222,7 @@ dgroups_app_rules = []  # type: List
 follow_mouse_focus = True
 bring_front_click = False
 cursor_warp = False
+frame_opacity=0.8
 floating_layout = layout.Floating(float_rules=[
     # Run the utility of `xprop` to see the wm class and name of an X client.
     *layout.Floating.default_float_rules,
@@ -198,7 +254,8 @@ wmname = "LG3D"
 
 commands = [
     "setxbmap es",
-    "feh --bg-fill /home/jonathan/Pictures/wallpapers/wallpaper4.jpg"
+    "feh --bg-fill /home/jonathan/Pictures/wallpapers/wallpaper10.jpg",
+    "compton &"
 ]
 
 for cmd in commands:
